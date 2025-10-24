@@ -46,8 +46,10 @@ void sr_add_rt_entry(struct sr_instance*, struct in_addr,struct in_addr,
 void sr_print_routing_table(struct sr_instance* sr);
 void sr_print_routing_entry(struct sr_rt* entry);
 
-void *sr_rip_timeout(void *sr_ptr);
-void send_rip_request(struct sr_instance *sr);
-void send_rip_response(struct sr_instance *sr);
-void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int len, char *interface);
+/* OSPF replaced RIP - these functions are now handled by sr_ospf.c */
+/* void *sr_rip_timeout(void *sr_ptr); */
+/* void send_rip_request(struct sr_instance *sr); */
+/* void send_rip_response(struct sr_instance *sr); */
+/* void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int len, char *interface); */
+
 #endif  /* --  sr_RT_H -- */

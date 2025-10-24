@@ -228,6 +228,16 @@ void sr_print_routing_entry(struct sr_rt* entry)
 
 } 
 
+/* RIP functions have been replaced by OSPF implementation in sr_ospf.c */
+/* The following functions are no longer used:
+ * - sr_rip_timeout()
+ * - send_rip_request()
+ * - send_rip_response()
+ * - update_route_table()
+ */
+
+#if 0  /* RIP code disabled - replaced by OSPF */
+
 /*---------------------------------------------------------------------
  * Method: sr_rip_timeout() 
  * @brief function periodically checks the status of all interfaces and updates the routing table   
@@ -562,3 +572,6 @@ void update_route_table(struct sr_instance *sr, uint8_t *packet, unsigned int le
 
   pthread_mutex_unlock(&(sr->rt_locker));
 }
+
+#endif  /* End of disabled RIP code */
+

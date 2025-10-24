@@ -496,7 +496,8 @@ int sr_read_from_server_expect(struct sr_instance* sr /* borrowed */, int expect
                 return -1;
             }
             sr_print_routing_table(sr);
-            send_rip_request(sr);
+            /* OSPF replaced RIP - initial neighbor discovery happens via Hello packets */
+            /* send_rip_request(sr); */
             printf(" <-- Ready to process packets --> \n");
             break;
 

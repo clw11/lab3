@@ -93,6 +93,72 @@ struct sr_rip_pkt {
 } __attribute__ ((packed)) ;
 typedef struct sr_rip_pkt sr_rip_pkt_t;
 
+/* OSPF Protocol Structures */
+#define OSPF_HELLO_INTERVAL 5      /* Send Hello every 5 seconds */
+#define OSPF_DEAD_INTERVAL 20      /* Neighbor timeout after 20 seconds */
+#define OSPF_LSA_REFRESH 5         /* Refresh LSAs every 5 seconds */
+#define OSPF_LSA_MAXAGE 20         /* LSA expires after 20 seconds */
+#define OSPF_MAX_NEIGHBORS 10      /* Maximum number of neighbors */
+#define OSPF_MAX_LSA 50            /* Maximum LSAs in database */
+
+/* OSPF packet types */
+#define OSPF_TYPE_HELLO 1
+#define OSPF_TYPE_LSU   4          /* Link State Update */
+
+/* OSPF Common Header */
+struct sr_ospf_hdr {
+  uint8_t version;                 /* OSPF version, should be 2 */
+  uint8_t type;                    /* OSPF packet type */
+  uint16_t len;                    /* Packet length including header */
+  uint32_t router_id;              /* Router ID */
+  uint32_t area_id;                /* Area ID, use 0 for backbone */
+  uint16_t checksum;               /* OSPF checksum */
+  uint16_t autype;                 /* Authentication type, use 0 for none */
+  uint64_t authentication;         /* Authentication data */
+} __attribute__ ((packed));
+typedef struct sr_ospf_hdr sr_ospf_hdr_t;
+
+/* OSPF Hello Packet */
+struct sr_ospf_hello {
+  struct sr_ospf_hdr header;
+  uint32_t network_mask;           /* Network mask */
+  uint16_t hello_interval;         /* Hello interval in seconds */
+  uint8_t options;                 /* OSPF options */
+  uint8_t priority;                /* Router priority */
+  uint32_t dead_interval;          /* Router dead interval */
+  uint32_t designated_router;      /* Designated router */
+  uint32_t backup_router;          /* Backup designated router */
+  uint32_t neighbor;               /* Neighbor router ID (only one for simplicity) */
+} __attribute__ ((packed));
+typedef struct sr_ospf_hello sr_ospf_hello_t;
+
+/* OSPF Link State Advertisement */
+struct sr_ospf_lsa {
+  uint32_t router_id;              /* Advertising router */
+  uint32_t subnet;                 /* Network subnet */
+  uint32_t mask;                   /* Network mask */
+  uint32_t seq;                    /* Sequence number */
+  uint16_t age;                    /* LSA age in seconds */
+  uint16_t num_links;              /* Number of links */
+} __attribute__ ((packed));
+typedef struct sr_ospf_lsa sr_ospf_lsa_t;
+
+/* OSPF Link in LSA */
+struct sr_ospf_link {
+  uint32_t subnet;                 /* Link subnet */
+  uint32_t mask;                   /* Link mask */
+  uint32_t router_id;              /* Connected router ID */
+} __attribute__ ((packed));
+typedef struct sr_ospf_link sr_ospf_link_t;
+
+/* OSPF Link State Update Packet */
+struct sr_ospf_lsu {
+  struct sr_ospf_hdr header;
+  uint32_t num_lsas;               /* Number of LSAs */
+  struct sr_ospf_lsa lsas[MAX_NUM_ENTRIES];  /* LSA entries */
+} __attribute__ ((packed));
+typedef struct sr_ospf_lsu sr_ospf_lsu_t;
+
 struct sr_udp_hdr {
   uint16_t port_src, port_dst; /* source and dest port_number */
   uint16_t udp_len;			/* total length */
@@ -196,6 +262,7 @@ typedef struct sr_ethernet_hdr sr_ethernet_hdr_t;
 enum sr_ip_protocol {
   ip_protocol_icmp = 0x0001,
   ip_protocol_udp = 0x0011,
+  ip_protocol_ospf = 0x0059,
 };
 
 enum sr_ethertype {

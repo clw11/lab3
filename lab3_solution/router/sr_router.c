@@ -23,6 +23,7 @@
 #include "sr_protocol.h"
 #include "sr_arpcache.h"
 #include "sr_utils.h"
+#include "sr_ospf.h"
 #include "vnscommand.h"
 
 
@@ -55,12 +56,16 @@ void sr_init(struct sr_instance* sr)
   pthread_mutexattr_settype(&(sr->rt_lock_attr), PTHREAD_MUTEX_RECURSIVE);
   pthread_mutex_init(&(sr->rt_lock), &(sr->rt_lock_attr));
 
+  /* Initialize OSPF */
+  sr_ospf_init(sr);
+
   pthread_attr_init(&(sr->rt_attr));
   pthread_attr_setdetachstate(&(sr->rt_attr), PTHREAD_CREATE_JOINABLE);
   pthread_attr_setscope(&(sr->rt_attr), PTHREAD_SCOPE_SYSTEM);
   pthread_attr_setscope(&(sr->rt_attr), PTHREAD_SCOPE_SYSTEM);
   pthread_t rt_thread;
-  pthread_create(&rt_thread, &(sr->rt_attr), sr_rip_timeout, sr);
+  /* Replace RIP with OSPF timeout thread */
+  pthread_create(&rt_thread, &(sr->rt_attr), sr_ospf_timeout, sr);
 
 } 
 
@@ -175,20 +180,29 @@ void sr_handle_ip(struct sr_instance* sr, uint8_t * buf, unsigned int len,char* 
   }
   ip->ip_sum = calc; 
 
+  /* Handle OSPF packets */
+  if(ip->ip_p == ip_protocol_ospf){
+    sr_ospf_hdr_t* ospf_hdr = (sr_ospf_hdr_t*)(buf + sizeof(sr_ethernet_hdr_t) + 
+                                                sizeof(sr_ip_hdr_t));
+    
+    if(ospf_hdr->type == OSPF_TYPE_HELLO){
+      /* Handle OSPF Hello packet */
+      sr_ospf_handle_hello(sr, buf, len, interface);
+    }
+    else if(ospf_hdr->type == OSPF_TYPE_LSU){
+      /* Handle OSPF Link State Update packet */
+      sr_ospf_handle_lsu(sr, buf, len, interface);
+    }
+    return;
+  }
+
   if(ip->ip_dst==broadcast_ip){
+    /* Broadcast packets that are not OSPF - ignore or handle as needed */
+    /* RIP handling removed - replaced by OSPF above */
     sr_udp_hdr_t* udp = (sr_udp_hdr_t*) (buf+sizeof(sr_ip_hdr_t)+sizeof(sr_ethernet_hdr_t));
     if(udp->port_src==520 && udp->port_dst==520){
-      /* send rip packet*/
-      sr_rip_pkt_t* rip = (sr_rip_pkt_t*) (buf+sizeof(sr_ip_hdr_t) + sizeof(sr_udp_hdr_t)+sizeof(sr_ethernet_hdr_t));
-
-      if(rip->command==1){/*it's a request?*/
-        /*printf("it's a rip request\n");*/
-        send_rip_response(sr);
-      }
-      else{/*it's a reply?*/
-        /*printf("it's a rip reply\n");*/
-        update_route_table(sr,(uint8_t*)buf,len,interface);
-      }
+      /* RIP packets no longer supported */
+      return;
     }
     else{
       /*printf("ip->ip_p is not udp\n");*/

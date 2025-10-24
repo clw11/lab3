@@ -1,0 +1,27 @@
+# Build artifacts
+*.o
+*.a
+*.so
+*.dylib
+
+# Executables
+lab3_solution/router/sr
+solution
+
+# Dependencies
+.*.d
+
+# Editor files
+*~
+*.swp
+*.swo
+.DS_Store
+
+# Logs and dumps
+*.log
+*.dump
+nohup.out
+
+# Temporary files
+core
+tags
