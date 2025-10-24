@@ -12,7 +12,7 @@
 
 任务三网络拓扑如下，其包含一台客户端（client）主机，三台需要你实现RIP协议的路由器（Router1, Router2, 和Router3），两台服务器（分别是server1和server2）主机，三台主机都连接于路由器，具体的IP和端口设置如下图所示。
 
-<img src="计网实验四.assets/topo3-16983026016822.png" alt="topo3" style="zoom:50%;" />
+<img src="img/topo3-16983026016822.png" alt="topo3" style="zoom:50%;" />
 
 #### 4.3.3 任务流程<a name="subsubsec4.3.3"></a>
 
